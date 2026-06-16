@@ -29,6 +29,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
+            balance REAL DEFAULT 0.0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS admins (
@@ -53,7 +54,13 @@ def init_db():
             UNIQUE(user_id, item_id)
         );
     """)
-    # 插入默认管理账号 admin1 / adminpass1（同原项目）
+    # 迁移：为已有 users 表添加 balance 列
+    try:
+        cur.execute("ALTER TABLE users ADD COLUMN balance REAL DEFAULT 0.0")
+    except sqlite3.OperationalError:
+        pass  # 列已存在
+
+    # 插入默认管理账号 admin1 / adminpass1
     existing = cur.execute("SELECT id FROM admins WHERE username='admin1'").fetchone()
     if not existing:
         cur.execute("INSERT INTO admins (username, password) VALUES (?, ?)",
@@ -102,6 +109,13 @@ def is_valid_price(price):
 def is_valid_item_name(name):
     """商品名称不超过15个字符"""
     return len(name) <= 15 and len(name) > 0
+
+def parse_price(price_str):
+    """价格字符串转浮点数"""
+    try:
+        return float(price_str)
+    except (ValueError, TypeError):
+        return 0.0
 
 def login_required(role='user'):
     """登录验证装饰器"""
@@ -181,13 +195,14 @@ def api_user_login():
         return jsonify({'ok': False, 'msg': '用户名和密码不能为空'})
     conn = get_db()
     user = conn.execute(
-        "SELECT id, username FROM users WHERE username=? AND password=?",
+        "SELECT id, username, balance FROM users WHERE username=? AND password=?",
         (username, password)
     ).fetchone()
     conn.close()
     if user:
         session['user_id'] = user['id']
         session['username'] = user['username']
+        session['balance'] = user['balance']
         session['role'] = 'user'
         return jsonify({'ok': True})
     return jsonify({'ok': False, 'msg': '用户名或密码错误'})
@@ -208,6 +223,7 @@ def api_admin_login():
     if admin:
         session['user_id'] = admin['id']
         session['username'] = admin['username']
+        session['balance'] = 0
         session['role'] = 'admin'
         return jsonify({'ok': True})
     return jsonify({'ok': False, 'msg': '用户名或密码错误'})
@@ -223,7 +239,7 @@ def api_user_register():
         return jsonify({'ok': False, 'msg': '用户名不能超过15个字符'})
     conn = get_db()
     try:
-        conn.execute("INSERT INTO users (username, password) VALUES (?, ?)",
+        conn.execute("INSERT INTO users (username, password, balance) VALUES (?, ?, 0.0)",
                      (username, password))
         conn.commit()
         return jsonify({'ok': True, 'msg': '注册成功！'})
@@ -238,7 +254,6 @@ def api_admin_register():
     auth_code = data.get('auth_code', '').strip()
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
-    # 原项目中的授权码 "regon"
     if auth_code != 'regon':
         return jsonify({'ok': False, 'msg': '授权码错误，无法注册管理员'})
     if not username or not password:
@@ -258,6 +273,19 @@ def api_admin_register():
 def api_logout():
     session.clear()
     return jsonify({'ok': True})
+
+# ── API: User Balance ────────────────────────────────────────────────────────
+@app.route('/api/user/balance', methods=['GET'])
+@login_required(role='user')
+def api_user_balance():
+    conn = get_db()
+    user = conn.execute(
+        "SELECT balance FROM users WHERE id=?", (session['user_id'],)
+    ).fetchone()
+    conn.close()
+    balance = user['balance'] if user else 0.0
+    session['balance'] = balance
+    return jsonify({'ok': True, 'balance': balance})
 
 # ── API: User Operations ──────────────────────────────────────────────────────
 @app.route('/api/user/release', methods=['POST'])
@@ -328,8 +356,9 @@ def api_user_purchase():
     if not item_id:
         return jsonify({'ok': False, 'msg': '无效的商品ID'})
     conn = get_db()
+    # 获取商品信息
     item = conn.execute(
-        "SELECT id, status FROM items WHERE id=?", (item_id,)
+        "SELECT id, name, price, seller_id, status FROM items WHERE id=?", (item_id,)
     ).fetchone()
     if not item:
         conn.close()
@@ -337,7 +366,7 @@ def api_user_purchase():
     if item['status'] != 'available':
         conn.close()
         return jsonify({'ok': False, 'msg': '该商品已售出'})
-    # 检查是否已经在购物车
+    # 检查购物车是否已有
     existing = conn.execute(
         "SELECT id FROM purchases WHERE user_id=? AND item_id=?",
         (session['user_id'], item_id)
@@ -345,14 +374,39 @@ def api_user_purchase():
     if existing:
         conn.close()
         return jsonify({'ok': False, 'msg': '该商品已在购物车中'})
+    # 检查余额
+    buyer = conn.execute(
+        "SELECT balance FROM users WHERE id=?", (session['user_id'],)
+    ).fetchone()
+    price_val = parse_price(item['price'])
+    if buyer['balance'] < price_val:
+        conn.close()
+        return jsonify({
+            'ok': False,
+            'msg': f'余额不足！当前余额：¥{buyer["balance"]:.2f}，商品价格：¥{price_val:.2f}'
+        })
+    # 扣买家钱
+    conn.execute(
+        "UPDATE users SET balance = balance - ? WHERE id=?",
+        (price_val, session['user_id'])
+    )
+    # 给卖家加钱（如果商品有卖家）
+    if item['seller_id'] is not None:
+        conn.execute(
+            "UPDATE users SET balance = balance + ? WHERE id=?",
+            (price_val, item['seller_id'])
+        )
+    # 记录购买
     conn.execute(
         "INSERT INTO purchases (user_id, item_id) VALUES (?, ?)",
         (session['user_id'], item_id)
     )
     conn.execute("UPDATE items SET status='sold' WHERE id=?", (item_id,))
     conn.commit()
+    # 更新 session 余额
+    session['balance'] = buyer['balance'] - price_val
     conn.close()
-    return jsonify({'ok': True, 'msg': '购买成功！商品已添加到您的购物车'})
+    return jsonify({'ok': True, 'msg': f'购买成功！已支付 ¥{price_val:.2f}'})
 
 @app.route('/api/user/cart', methods=['GET'])
 @login_required(role='user')
@@ -436,7 +490,6 @@ def api_admin_item_delete():
     data = request.get_json()
     item_id = data.get('item_id', type=int)
     secondary_pwd = data.get('secondary_password', '').strip()
-    # 原项目中的二级密码 "accon"
     if secondary_pwd != 'accon':
         return jsonify({'ok': False, 'msg': '二级密码错误，无法删除商品'})
     if not item_id:
@@ -479,7 +532,7 @@ def api_admin_users():
     conn = get_db()
     total = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     users = conn.execute("""
-        SELECT u.id, u.username, u.created_at,
+        SELECT u.id, u.username, u.balance, u.created_at,
                (SELECT COUNT(*) FROM purchases WHERE user_id=u.id) as purchase_count
         FROM users u
         ORDER BY u.id
@@ -512,6 +565,27 @@ def api_admin_user_delete():
     conn.commit()
     conn.close()
     return jsonify({'ok': True, 'msg': '用户删除成功！'})
+
+@app.route('/api/admin/user/recharge', methods=['POST'])
+@login_required(role='admin')
+def api_admin_user_recharge():
+    data = request.get_json()
+    user_id = data.get('user_id', type=int)
+    amount = data.get('amount', type=float)
+    if not user_id:
+        return jsonify({'ok': False, 'msg': '无效的用户ID'})
+    if not amount or amount <= 0:
+        return jsonify({'ok': False, 'msg': '充值金额必须大于0'})
+    conn = get_db()
+    user = conn.execute("SELECT id FROM users WHERE id=?", (user_id,)).fetchone()
+    if not user:
+        conn.close()
+        return jsonify({'ok': False, 'msg': '用户不存在'})
+    conn.execute("UPDATE users SET balance = balance + ? WHERE id=?", (amount, user_id))
+    conn.commit()
+    new_balance = conn.execute("SELECT balance FROM users WHERE id=?", (user_id,)).fetchone()[0]
+    conn.close()
+    return jsonify({'ok': True, 'msg': f'充值成功！已充值 ¥{amount:.2f}，当前余额 ¥{new_balance:.2f}'})
 
 if __name__ == '__main__':
     import os

@@ -4,16 +4,21 @@
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="text-center mb-4">
-            <h3>🔧 管理员面板</h3>
-            <p class="text-muted">欢迎，{{ username }}！</p>
+            <div class="welcome-avatar mb-3">
+                <i class="fas fa-user-shield fa-4x text-success"></i>
+            </div>
+            <h3 class="fw-bold">管理员面板</h3>
+            <p class="text-muted">欢迎回来，{{ username }}！</p>
         </div>
         <div class="row g-3">
             <div class="col-md-6">
                 <a href="{{ url_for('admin_items_page') }}" class="text-decoration-none">
                     <div class="card dashboard-card text-center p-3 h-100">
                         <div class="card-body">
-                            <div class="fs-1 mb-2">📦</div>
-                            <h6>商品管理</h6>
+                            <div class="dashboard-icon bg-primary bg-opacity-10 mb-3">
+                                <i class="fas fa-boxes fa-2x text-primary"></i>
+                            </div>
+                            <h6 class="fw-bold">商品管理</h6>
                             <small class="text-muted">浏览、添加、删除、修改商品</small>
                         </div>
                     </div>
@@ -23,9 +28,11 @@
                 <a href="{{ url_for('admin_users_page') }}" class="text-decoration-none">
                     <div class="card dashboard-card text-center p-3 h-100">
                         <div class="card-body">
-                            <div class="fs-1 mb-2">👥</div>
-                            <h6>用户管理</h6>
-                            <small class="text-muted">查看和删除用户</small>
+                            <div class="dashboard-icon bg-success bg-opacity-10 mb-3">
+                                <i class="fas fa-users-cog fa-2x text-success"></i>
+                            </div>
+                            <h6 class="fw-bold">用户管理</h6>
+                            <small class="text-muted">查看、充值、删除用户</small>
                         </div>
                     </div>
                 </a>
@@ -36,7 +43,9 @@
 {% endblock %}
 {% block scripts %}
 <style>
-.dashboard-card { transition: transform .2s, box-shadow .2s; cursor: pointer; border: 1px solid #e0e0e0; }
-.dashboard-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,.1); }
+.dashboard-card { transition: all .25s ease; cursor: pointer; border: 1px solid #eef2f7; border-radius: 16px; }
+.dashboard-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,.08); border-color: transparent; }
+.dashboard-icon { width: 56px; height: 56px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; }
+.welcome-avatar i { font-size: 3.5rem; opacity: .8; }
 </style>
 {% endblock %}

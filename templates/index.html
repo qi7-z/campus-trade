@@ -1,36 +1,53 @@
 {% extends "base.html" %}
 {% block title %}校园二手物品交易系统 - 首页{% endblock %}
 {% block content %}
-<div class="row justify-content-center min-vh-75 align-items-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="text-center mb-5">
-            <div class="welcome-icon mb-3">🏪</div>
-            <h1 class="display-4 fw-bold text-primary">校园二手物品交易系统</h1>
-            <p class="text-muted fs-5">安全、便捷的校园二手交易平台</p>
-        </div>
-        <div class="row g-3">
-            <div class="col-6">
-                <div class="card text-center h-100 border-primary">
-                    <div class="card-body py-4">
-                        <div class="fs-1 mb-2">👤</div>
-                        <h5 class="card-title">普通用户</h5>
-                        <p class="card-text text-muted small">浏览商品、发布闲置、购买心仪物品</p>
-                        <div class="d-grid gap-2">
-                            <a href="{{ url_for('user_register_page') }}" class="btn btn-outline-primary btn-sm">注册</a>
-                            <button class="btn btn-primary" onclick="showLoginForm('user')">登录</button>
+<div class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="row justify-content-center align-items-center min-vh-85">
+        <div class="col-md-8 col-lg-6 position-relative" style="z-index:2;">
+            <div class="text-center mb-5">
+                <div class="hero-icon mb-3">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <h1 class="display-4 fw-bold text-white mb-2">校园二手物品交易系统</h1>
+                <p class="text-white-50 fs-5 mb-4">安全、便捷的校园二手交易平台 · 让闲置物品找到新主人</p>
+                <div class="row g-3 mt-3">
+                    <div class="col-6">
+                        <div class="card border-0 shadow-lg h-100" style="border-radius:16px;backdrop-filter:blur(10px);background:rgba(255,255,255,0.95);">
+                            <div class="card-body py-4 px-4">
+                                <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;">
+                                    <i class="fas fa-user fa-2x text-primary"></i>
+                                </div>
+                                <h5 class="fw-bold">普通用户</h5>
+                                <p class="text-muted small mb-3">浏览商品、发布闲置、购买心仪物品</p>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('user_register_page') }}" class="btn btn-outline-primary rounded-pill">
+                                        <i class="fas fa-user-plus me-1"></i>注册
+                                    </a>
+                                    <button class="btn btn-primary rounded-pill" onclick="showLoginForm('user')">
+                                        <i class="fas fa-sign-in-alt me-1"></i>登录
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="card text-center h-100 border-success">
-                    <div class="card-body py-4">
-                        <div class="fs-1 mb-2">🔧</div>
-                        <h5 class="card-title">管理员</h5>
-                        <p class="card-text text-muted small">管理商品、用户和信息维护</p>
-                        <div class="d-grid gap-2">
-                            <a href="{{ url_for('admin_register_page') }}" class="btn btn-outline-success btn-sm">注册</a>
-                            <button class="btn btn-success" onclick="showLoginForm('admin')">登录</button>
+                    <div class="col-6">
+                        <div class="card border-0 shadow-lg h-100" style="border-radius:16px;backdrop-filter:blur(10px);background:rgba(255,255,255,0.95);">
+                            <div class="card-body py-4 px-4">
+                                <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;">
+                                    <i class="fas fa-shield-alt fa-2x text-success"></i>
+                                </div>
+                                <h5 class="fw-bold">管理员</h5>
+                                <p class="text-muted small mb-3">管理商品、用户和信息维护</p>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('admin_register_page') }}" class="btn btn-outline-success rounded-pill">
+                                        <i class="fas fa-user-plus me-1"></i>注册
+                                    </a>
+                                    <button class="btn btn-success rounded-pill" onclick="showLoginForm('admin')">
+                                        <i class="fas fa-sign-in-alt me-1"></i>登录
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -39,26 +56,34 @@
     </div>
 </div>
 
-<!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title" id="loginTitle">用户登录</h5>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="loginTitle">
+                    <i class="fas fa-sign-in-alt me-1"></i>
+                    <span id="loginTitleText">用户登录</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body pt-3">
                 <form id="loginForm" onsubmit="return false;">
                     <div class="mb-3">
-                        <label class="form-label">用户名</label>
-                        <input type="text" class="form-control" id="loginUsername" required autocomplete="off">
+                        <label class="form-label small fw-medium text-muted">用户名</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="loginUsername" required autocomplete="off" placeholder="请输入用户名">
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">密码</label>
-                        <input type="password" class="form-control" id="loginPassword" required>
+                        <label class="form-label small fw-medium text-muted">密码</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                            <input type="password" class="form-control border-start-0 ps-0" id="loginPassword" required placeholder="请输入密码">
+                        </div>
                     </div>
-                    <div id="loginError" class="alert alert-danger d-none"></div>
-                    <button type="submit" class="btn btn-primary w-100" id="loginBtn">登录</button>
+                    <div id="loginError" class="alert alert-danger d-none py-2 small"></div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-medium" id="loginBtn">登录</button>
                 </form>
             </div>
         </div>
@@ -72,7 +97,7 @@
 
     function showLoginForm(role) {
         loginRole = role;
-        document.getElementById('loginTitle').textContent = role === 'user' ? '用户登录' : '管理员登录';
+        document.getElementById('loginTitleText').textContent = role === 'user' ? '用户登录' : '管理员登录';
         document.getElementById('loginError').classList.add('d-none');
         document.getElementById('loginUsername').value = '';
         document.getElementById('loginPassword').value = '';
@@ -91,14 +116,11 @@
             errEl.classList.remove('d-none');
             return;
         }
-
         btn.disabled = true;
-        btn.textContent = '登录中...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>登录中...';
         errEl.classList.add('d-none');
-
         const endpoint = loginRole === 'user' ? '/api/user/login' : '/api/admin/login';
         const result = await api(endpoint, { username, password });
-
         if (result.ok) {
             window.location.href = loginRole === 'user' ? '/user/dashboard' : '/admin/dashboard';
         } else {

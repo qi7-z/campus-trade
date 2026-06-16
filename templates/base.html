@@ -5,18 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}校园二手物品交易系统{% endblock %}</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     {% if session.get('user_id') %}
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('user_dashboard') if session.get('role')=='user' else url_for('admin_dashboard') }}">
-                🏪 校园二手交易
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('user_dashboard') if session.get('role')=='user' else url_for('admin_dashboard') }}">
+                <i class="fas fa-store"></i>
+                <span>校园二手交易</span>
             </a>
-            <div class="ms-auto d-flex align-items-center gap-3">
-                <span class="text-white-50">👤 {{ session.get('username') }}</span>
-                <button class="btn btn-outline-light btn-sm" onclick="logout()">退出登录</button>
+            <div class="d-flex align-items-center gap-3">
+                {% if session.get('role') == 'user' %}
+                <div class="balance-badge">
+                    <i class="fas fa-wallet"></i>
+                    <span id="navBalance">¥{{ "%.2f"|format(session.get('balance', 0)) }}</span>
+                </div>
+                {% endif %}
+                <span class="user-badge">
+                    <i class="fas fa-user-circle"></i>
+                    {{ session.get('username') }}
+                </span>
+                <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-1"></i>退出
+                </button>
             </div>
         </div>
     </nav>
@@ -49,10 +62,22 @@
                 return div;
             })();
             const el = document.createElement('div');
-            el.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show`;
-            el.innerHTML = `${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            el.className = `toast-notification toast-${type === 'error' ? 'error' : 'success'}`;
+            el.innerHTML = `
+                <div class="toast-icon">${type === 'error' ? '✕' : '✓'}</div>
+                <div class="toast-msg">${msg}</div>
+            `;
             container.appendChild(el);
-            setTimeout(() => el.remove(), 3000);
+            setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(100px)'; setTimeout(() => el.remove(), 300); }, 3000);
+        }
+
+        async function refreshBalance() {
+            if (document.getElementById('navBalance')) {
+                const data = await api('/api/user/balance');
+                if (data.ok) {
+                    document.getElementById('navBalance').textContent = '¥' + data.balance.toFixed(2);
+                }
+            }
         }
     </script>
     {% block scripts %}{% endblock %}

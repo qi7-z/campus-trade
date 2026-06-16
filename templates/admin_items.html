@@ -2,112 +2,115 @@
 {% block title %}商品管理{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">📦 商品管理</h4>
+    <h4 class="fw-bold mb-0"><i class="fas fa-boxes text-primary me-2"></i>商品管理</h4>
     <div>
-        <button class="btn btn-success btn-sm me-1" onclick="showAddModal()">+ 添加商品</button>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary btn-sm">← 返回</a>
+        <button class="btn btn-success rounded-pill btn-sm px-3 me-1" onclick="showAddModal()">
+            <i class="fas fa-plus me-1"></i>添加商品
+        </button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary rounded-pill btn-sm px-3">
+            <i class="fas fa-arrow-left me-1"></i>返回
+        </a>
     </div>
 </div>
-<div class="card shadow-sm">
-    <div class="card-body">
+<div class="card shadow-sm border-0" style="border-radius:16px;">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>ID</th>
+                        <th class="ps-4">ID</th>
                         <th>商品名称</th>
-                        <th>价格（元）</th>
+                        <th>价格</th>
                         <th>卖家</th>
                         <th>状态</th>
                         <th>上架时间</th>
-                        <th style="width:160px">操作</th>
+                        <th class="pe-4" style="width:150px">操作</th>
                     </tr>
                 </thead>
                 <tbody id="itemTableBody">
-                    <tr><td colspan="7" class="text-center text-muted">加载中...</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted py-4">加载中...</td></tr>
                 </tbody>
             </table>
         </div>
-        <nav id="paginationNav" class="d-none">
+        <nav id="paginationNav" class="d-none p-3 border-top">
             <ul class="pagination justify-content-center mb-0">
-                <li class="page-item" id="prevPage"><a class="page-link" href="#">上一页</a></li>
+                <li class="page-item" id="prevPage"><a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a></li>
                 <li class="page-item disabled"><a class="page-link" id="pageInfo" href="#">1/1</a></li>
-                <li class="page-item" id="nextPage"><a class="page-link" href="#">下一页</a></li>
+                <li class="page-item" id="nextPage"><a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a></li>
             </ul>
         </nav>
     </div>
 </div>
 
-<!-- Add Item Modal -->
+<!-- Add Modal -->
 <div class="modal fade" id="addModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title">添加商品</h5>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle text-success me-1"></i>添加商品</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body pt-3">
                 <form id="addForm" onsubmit="return false;">
                     <div class="mb-3">
-                        <label class="form-label">商品名称</label>
+                        <label class="form-label small fw-medium text-muted">商品名称</label>
                         <input type="text" class="form-control" id="addName" maxlength="15" required autocomplete="off">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">价格（元）</label>
+                        <label class="form-label small fw-medium text-muted">价格（元）</label>
                         <input type="text" class="form-control" id="addPrice" required autocomplete="off">
                     </div>
-                    <div id="addError" class="alert alert-danger d-none"></div>
-                    <button type="submit" class="btn btn-success w-100">确认添加</button>
+                    <div id="addError" class="alert alert-danger d-none py-2 small"></div>
+                    <button type="submit" class="btn btn-success w-100 rounded-pill py-2">确认添加</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Delete Item Modal -->
+<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title">删除商品</h5>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger"><i class="fas fa-exclamation-triangle me-1"></i>删除商品</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p>确定要删除该商品吗？此操作不可撤销。</p>
+            <div class="modal-body pt-3">
+                <p class="small">此操作不可撤销。</p>
                 <form id="deleteForm" onsubmit="return false;">
                     <div class="mb-3">
-                        <label class="form-label">请输入二级密码以确认</label>
-                        <input type="password" class="form-control" id="deletePwd" required
-                               placeholder="二级密码（原项目: accom）">
+                        <label class="form-label small fw-medium text-muted">二级密码</label>
+                        <input type="password" class="form-control" id="deletePwd" required placeholder="accon">
                     </div>
-                    <div id="deleteError" class="alert alert-danger d-none"></div>
-                    <button type="submit" class="btn btn-danger w-100">确认删除</button>
+                    <div id="deleteError" class="alert alert-danger d-none py-2 small"></div>
+                    <button type="submit" class="btn btn-danger w-100 rounded-pill py-2">确认删除</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modify Item Modal -->
+<!-- Modify Modal -->
 <div class="modal fade" id="modifyModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title">修改商品</h5>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-edit text-warning me-1"></i>修改商品</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body pt-3">
                 <form id="modifyForm" onsubmit="return false;">
                     <div class="mb-3">
-                        <label class="form-label">商品名称</label>
+                        <label class="form-label small fw-medium text-muted">商品名称</label>
                         <input type="text" class="form-control" id="modifyName" maxlength="15" required autocomplete="off">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">价格（元）</label>
+                        <label class="form-label small fw-medium text-muted">价格（元）</label>
                         <input type="text" class="form-control" id="modifyPrice" required autocomplete="off">
                     </div>
-                    <div id="modifyError" class="alert alert-danger d-none"></div>
-                    <button type="submit" class="btn btn-warning w-100">确认修改</button>
+                    <div id="modifyError" class="alert alert-danger d-none py-2 small"></div>
+                    <button type="submit" class="btn btn-warning w-100 rounded-pill py-2">确认修改</button>
                 </form>
             </div>
         </div>
@@ -116,132 +119,62 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    let currentPage = 1;
-    let deleteItemId = null;
-    let modifyItemId = null;
-
+    let currentPage = 1, deleteItemId = null, modifyItemId = null;
     async function loadItems(page) {
         const data = await api(`/api/admin/items?page=${page}`, null);
         const tbody = document.getElementById('itemTableBody');
         const nav = document.getElementById('paginationNav');
-
         if (!data.ok || data.items.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">暂无商品</td></tr>';
-            nav.classList.add('d-none');
-            return;
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">暂无商品</td></tr>';
+            nav.classList.add('d-none'); return;
         }
-
         tbody.innerHTML = data.items.map(item => {
-            const statusBadge = item.status === 'available'
-                ? '<span class="badge bg-success">在售</span>'
-                : '<span class="badge bg-secondary">已售</span>';
+            const badge = item.status === 'available'
+                ? '<span class="badge bg-success rounded-pill">在售</span>'
+                : '<span class="badge bg-secondary rounded-pill">已售</span>';
             return `<tr>
-                <td>${item.id}</td>
-                <td>${item.name}</td>
-                <td>¥${item.price}</td>
+                <td class="ps-4 text-muted">${item.id}</td>
+                <td><strong>${item.name}</strong></td>
+                <td><span class="fw-bold text-danger">¥${item.price}</span></td>
                 <td>${item.seller_name}</td>
-                <td>${statusBadge}</td>
-                <td>${item.created_at}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm me-1" onclick="showModifyModal(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.price}')">修改</button>
-                    <button class="btn btn-danger btn-sm" onclick="showDeleteModal(${item.id})">删除</button>
+                <td>${badge}</td>
+                <td class="small text-muted">${item.created_at}</td>
+                <td class="pe-4">
+                    <button class="btn btn-warning btn-sm rounded-pill px-2 me-1" onclick="showModifyModal(${item.id}, '${item.name.replace(/'/g,"\\'")}', '${item.price}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-2" onclick="showDeleteModal(${item.id})"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>`;
         }).join('');
-
         document.getElementById('pageInfo').textContent = `${page}/${data.total_pages}`;
         document.getElementById('prevPage').classList.toggle('disabled', page <= 1);
         document.getElementById('nextPage').classList.toggle('disabled', page >= data.total_pages);
         nav.classList.remove('d-none');
     }
+    document.getElementById('prevPage').addEventListener('click', e => { e.preventDefault(); if (currentPage > 1) loadItems(--currentPage); });
+    document.getElementById('nextPage').addEventListener('click', e => { e.preventDefault(); loadItems(++currentPage); });
 
-    document.getElementById('prevPage').addEventListener('click', e => {
-        e.preventDefault();
-        if (currentPage > 1) loadItems(--currentPage);
-    });
-    document.getElementById('nextPage').addEventListener('click', e => {
-        e.preventDefault();
-        loadItems(++currentPage);
-    });
-
-    function showAddModal() {
-        document.getElementById('addName').value = '';
-        document.getElementById('addPrice').value = '';
-        document.getElementById('addError').classList.add('d-none');
-        new bootstrap.Modal(document.getElementById('addModal')).show();
-    }
-
-    function showDeleteModal(id) {
-        deleteItemId = id;
-        document.getElementById('deletePwd').value = '';
-        document.getElementById('deleteError').classList.add('d-none');
-        new bootstrap.Modal(document.getElementById('deleteModal')).show();
-    }
-
-    function showModifyModal(id, name, price) {
-        modifyItemId = id;
-        document.getElementById('modifyName').value = name;
-        document.getElementById('modifyPrice').value = price;
-        document.getElementById('modifyError').classList.add('d-none');
-        new bootstrap.Modal(document.getElementById('modifyModal')).show();
-    }
+    function showAddModal() { document.getElementById('addName').value = ''; document.getElementById('addPrice').value = ''; document.getElementById('addError').classList.add('d-none'); new bootstrap.Modal(document.getElementById('addModal')).show(); }
+    function showDeleteModal(id) { deleteItemId = id; document.getElementById('deletePwd').value = ''; document.getElementById('deleteError').classList.add('d-none'); new bootstrap.Modal(document.getElementById('deleteModal')).show(); }
+    function showModifyModal(id, name, price) { modifyItemId = id; document.getElementById('modifyName').value = name; document.getElementById('modifyPrice').value = price; document.getElementById('modifyError').classList.add('d-none'); new bootstrap.Modal(document.getElementById('modifyModal')).show(); }
 
     document.getElementById('addForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const name = document.getElementById('addName').value.trim();
-        const price = document.getElementById('addPrice').value.trim();
-        const errEl = document.getElementById('addError');
-        errEl.classList.add('d-none');
-        const result = await api('/api/admin/item/add', { name, price });
-        if (result.ok) {
-            bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
-            showToast('商品添加成功！', 'success');
-            loadItems(currentPage);
-        } else {
-            errEl.textContent = result.msg;
-            errEl.classList.remove('d-none');
-        }
+        const result = await api('/api/admin/item/add', { name: document.getElementById('addName').value.trim(), price: document.getElementById('addPrice').value.trim() });
+        if (result.ok) { bootstrap.Modal.getInstance(document.getElementById('addModal')).hide(); showToast('商品添加成功！', 'success'); loadItems(currentPage); }
+        else { document.getElementById('addError').textContent = result.msg; document.getElementById('addError').classList.remove('d-none'); }
     });
-
     document.getElementById('deleteForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const secondary_password = document.getElementById('deletePwd').value.trim();
-        const errEl = document.getElementById('deleteError');
-        errEl.classList.add('d-none');
-        const result = await api('/api/admin/item/delete', {
-            item_id: deleteItemId,
-            secondary_password
-        });
-        if (result.ok) {
-            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-            showToast('商品删除成功！', 'success');
-            loadItems(currentPage);
-        } else {
-            errEl.textContent = result.msg;
-            errEl.classList.remove('d-none');
-        }
+        const result = await api('/api/admin/item/delete', { item_id: deleteItemId, secondary_password: document.getElementById('deletePwd').value.trim() });
+        if (result.ok) { bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide(); showToast('商品删除成功！', 'success'); loadItems(currentPage); }
+        else { document.getElementById('deleteError').textContent = result.msg; document.getElementById('deleteError').classList.remove('d-none'); }
     });
-
     document.getElementById('modifyForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const name = document.getElementById('modifyName').value.trim();
-        const price = document.getElementById('modifyPrice').value.trim();
-        const errEl = document.getElementById('modifyError');
-        errEl.classList.add('d-none');
-        const result = await api('/api/admin/item/modify', {
-            item_id: modifyItemId,
-            name, price
-        });
-        if (result.ok) {
-            bootstrap.Modal.getInstance(document.getElementById('modifyModal')).hide();
-            showToast('商品修改成功！', 'success');
-            loadItems(currentPage);
-        } else {
-            errEl.textContent = result.msg;
-            errEl.classList.remove('d-none');
-        }
+        const result = await api('/api/admin/item/modify', { item_id: modifyItemId, name: document.getElementById('modifyName').value.trim(), price: document.getElementById('modifyPrice').value.trim() });
+        if (result.ok) { bootstrap.Modal.getInstance(document.getElementById('modifyModal')).hide(); showToast('商品修改成功！', 'success'); loadItems(currentPage); }
+        else { document.getElementById('modifyError').textContent = result.msg; document.getElementById('modifyError').classList.remove('d-none'); }
     });
-
     loadItems(1);
 </script>
 {% endblock %}
