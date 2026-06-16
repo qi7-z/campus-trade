@@ -352,7 +352,7 @@ def api_user_search():
 @login_required(role='user')
 def api_user_purchase():
     data = request.get_json()
-    item_id = data.get('item_id', type=int)
+    item_id = data.get('item_id')
     if not item_id:
         return jsonify({'ok': False, 'msg': '无效的商品ID'})
     conn = get_db()
@@ -488,7 +488,7 @@ def api_admin_item_add():
 @login_required(role='admin')
 def api_admin_item_delete():
     data = request.get_json()
-    item_id = data.get('item_id', type=int)
+    item_id = data.get('item_id')
     secondary_pwd = data.get('secondary_password', '').strip()
     if secondary_pwd != 'accon':
         return jsonify({'ok': False, 'msg': '二级密码错误，无法删除商品'})
@@ -505,7 +505,7 @@ def api_admin_item_delete():
 @login_required(role='admin')
 def api_admin_item_modify():
     data = request.get_json()
-    item_id = data.get('item_id', type=int)
+    item_id = data.get('item_id')
     name = data.get('name', '').strip()
     price = data.get('price', '').strip()
     if not item_id:
@@ -552,7 +552,7 @@ def api_admin_users():
 @login_required(role='admin')
 def api_admin_user_delete():
     data = request.get_json()
-    user_id = data.get('user_id', type=int)
+    user_id = data.get('user_id')
     secondary_pwd = data.get('secondary_password', '').strip()
     if secondary_pwd != 'accon':
         return jsonify({'ok': False, 'msg': '二级密码错误，无法删除用户'})
@@ -570,8 +570,8 @@ def api_admin_user_delete():
 @login_required(role='admin')
 def api_admin_user_recharge():
     data = request.get_json()
-    user_id = data.get('user_id', type=int)
-    amount = data.get('amount', type=float)
+    user_id = data.get('user_id')
+    amount = data.get('amount')
     if not user_id:
         return jsonify({'ok': False, 'msg': '无效的用户ID'})
     if not amount or amount <= 0:

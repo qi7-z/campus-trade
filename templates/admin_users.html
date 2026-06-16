@@ -7,22 +7,21 @@
         <i class="fas fa-arrow-left me-1"></i>返回
     </a>
 </div>
-
 <div class="card shadow-sm border-0" style="border-radius:16px;">
-    <div class="card-body p-4">
-        <p class="text-muted mb-3">
-            <i class="fas fa-database me-1"></i>共 <strong id="userCount">0</strong> 个用户
-        </p>
+    <div class="card-body p-0">
+        <div class="p-3 border-bottom bg-light bg-opacity-50">
+            <span class="small text-muted"><i class="fas fa-database me-1"></i>共 <strong id="userCount">0</strong> 个用户</span>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>ID</th>
+                        <th class="ps-4">ID</th>
                         <th>用户名</th>
                         <th>余额</th>
                         <th>注册时间</th>
                         <th>购买次数</th>
-                        <th style="width:160px">操作</th>
+                        <th class="pe-4 text-center" style="width:180px">操作</th>
                     </tr>
                 </thead>
                 <tbody id="userTableBody">
@@ -30,7 +29,7 @@
                 </tbody>
             </table>
         </div>
-        <nav id="paginationNav" class="d-none mt-3">
+        <nav id="paginationNav" class="d-none p-3 border-top">
             <ul class="pagination justify-content-center mb-0">
                 <li class="page-item" id="prevPage"><a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a></li>
                 <li class="page-item disabled"><a class="page-link" id="pageInfo" href="#">1/1</a></li>
@@ -43,23 +42,24 @@
 <!-- Recharge Modal -->
 <div class="modal fade" id="rechargeModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow" style="border-radius:16px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-coins text-warning me-1"></i>
-                    余额充值 - <span id="rechargeUsername"></span>
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold"><i class="fas fa-coins text-warning me-1"></i>充值</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body pt-3">
-                <p class="small text-muted mb-3">选择充值金额：</p>
-                <div class="row g-2 mb-3">
-                    <div class="col-4"><button class="btn btn-outline-primary w-100 recharge-amount" data-amount="30">¥30</button></div>
-                    <div class="col-4"><button class="btn btn-outline-primary w-100 recharge-amount" data-amount="50">¥50</button></div>
-                    <div class="col-4"><button class="btn btn-outline-primary w-100 recharge-amount" data-amount="100">¥100</button></div>
-                    <div class="col-4"><button class="btn btn-outline-primary w-100 recharge-amount" data-amount="200">¥200</button></div>
-                    <div class="col-4"><button class="btn btn-outline-primary w-100 recharge-amount" data-amount="300">¥300</button></div>
-                    <div class="col-4"><button class="btn btn-outline-primary w-100 recharge-amount" data-amount="500">¥500</button></div>
+            <div class="modal-body px-4 pb-4 pt-3">
+                <div class="text-center mb-3">
+                    <span class="text-muted small">为</span>
+                    <strong id="rechargeUsername">用户</strong>
+                    <span class="text-muted small">充值</span>
+                </div>
+                <div class="row g-2 mb-3" id="amountGrid">
+                    <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 amt-btn" data-val="30">¥30</button></div>
+                    <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 amt-btn" data-val="50">¥50</button></div>
+                    <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 amt-btn" data-val="100">¥100</button></div>
+                    <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 amt-btn" data-val="200">¥200</button></div>
+                    <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 amt-btn" data-val="300">¥300</button></div>
+                    <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 amt-btn" data-val="500">¥500</button></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-medium text-muted">自定义金额</label>
@@ -70,7 +70,7 @@
                 </div>
                 <div id="rechargeError" class="alert alert-danger d-none py-2 small"></div>
                 <div id="rechargeSuccess" class="alert alert-success d-none py-2 small"></div>
-                <button class="btn btn-warning w-100 rounded-pill py-2 fw-medium" onclick="confirmRecharge()">
+                <button type="button" class="btn btn-warning w-100 rounded-pill py-2 fw-bold" id="rechargeConfirmBtn">
                     <i class="fas fa-check me-1"></i>确认充值
                 </button>
             </div>
@@ -81,19 +81,17 @@
 <!-- Delete User Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow" style="border-radius:16px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-danger">
-                    <i class="fas fa-exclamation-triangle me-1"></i>删除用户
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-danger"><i class="fas fa-exclamation-triangle me-1"></i>删除用户</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body pt-3">
-                <p class="small">确定要删除该用户吗？该用户的所有商品和购买记录也将被删除。</p>
-                <form id="deleteForm" onsubmit="return false;">
+            <div class="modal-body px-4 pb-4 pt-3">
+                <p class="small text-muted">该用户的所有商品和购买记录也将被删除。</p>
+                <form id="deleteForm" onsubmit="return doDeleteUser(event);">
                     <div class="mb-3">
-                        <label class="form-label small fw-medium text-muted">请输入二级密码以确认</label>
-                        <input type="password" class="form-control" id="deletePwd" required placeholder="二级密码">
+                        <label class="form-label small fw-medium text-muted">二级密码</label>
+                        <input type="password" class="form-control" id="deletePwd" required placeholder="accon">
                     </div>
                     <div id="deleteError" class="alert alert-danger d-none py-2 small"></div>
                     <button type="submit" class="btn btn-danger w-100 rounded-pill py-2">确认删除</button>
@@ -105,140 +103,137 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    let currentPage = 1;
-    let targetUserId = null;
-    let targetUsername = '';
-    let selectedAmount = null;
+    var userPage = 1;
+    var rechargeUserId = null;
+    var rechargeAmount = null;
+    var delUserId = null;
+    var delUsername = '';
 
     async function loadUsers(page) {
-        const data = await api(`/api/admin/users?page=${page}`, null);
-        const tbody = document.getElementById('userTableBody');
-        const nav = document.getElementById('paginationNav');
+        var data = await api('/api/admin/users?page=' + page, null);
+        var tbody = document.getElementById('userTableBody');
+        var nav = document.getElementById('paginationNav');
         document.getElementById('userCount').textContent = data.total || 0;
         if (!data.ok || data.users.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">暂无用户</td></tr>';
             nav.classList.add('d-none');
             return;
         }
-        tbody.innerHTML = data.users.map(user => `
-            <tr>
-                <td>${user.id}</td>
-                <td><strong>${user.username}</strong></td>
-                <td><span class="fw-bold text-primary">¥${user.balance.toFixed(2)}</span></td>
-                <td>${user.created_at}</td>
-                <td>${user.purchase_count}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm rounded-pill px-3 me-1" onclick="showRechargeModal(${user.id}, '${user.username}')">
-                        <i class="fas fa-coins me-1"></i>充值
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="showDeleteModal(${user.id}, '${user.username}')">
-                        <i class="fas fa-trash-alt me-1"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-        document.getElementById('pageInfo').textContent = `${page}/${data.total_pages}`;
+        tbody.innerHTML = data.users.map(function(user) {
+            return '<tr>' +
+                '<td class="ps-4 text-muted">' + user.id + '</td>' +
+                '<td><strong>' + user.username + '</strong></td>' +
+                '<td><span class="fw-bold text-primary">¥' + user.balance.toFixed(2) + '</span></td>' +
+                '<td class="small text-muted">' + user.created_at + '</td>' +
+                '<td>' + user.purchase_count + '</td>' +
+                '<td class="pe-4 text-center">' +
+                    '<button class="btn btn-warning btn-sm rounded-pill px-3" onclick="openRecharge(' + user.id + ',\'' + user.username + '\')" style="margin-right:4px;">' +
+                        '<i class="fas fa-coins me-1"></i>充值' +
+                    '</button>' +
+                    '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="openDelete(' + user.id + ',\'' + user.username + '\')">' +
+                        '<i class="fas fa-trash-alt me-1"></i>删除' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+        document.getElementById('pageInfo').textContent = page + '/' + data.total_pages;
         document.getElementById('prevPage').classList.toggle('disabled', page <= 1);
         document.getElementById('nextPage').classList.toggle('disabled', page >= data.total_pages);
         nav.classList.remove('d-none');
     }
+    document.getElementById('prevPage').addEventListener('click', function(e) { e.preventDefault(); if (userPage > 1) loadUsers(--userPage); });
+    document.getElementById('nextPage').addEventListener('click', function(e) { e.preventDefault(); loadUsers(++userPage); });
 
-    document.getElementById('prevPage').addEventListener('click', e => {
-        e.preventDefault();
-        if (currentPage > 1) loadUsers(--currentPage);
-    });
-    document.getElementById('nextPage').addEventListener('click', e => {
-        e.preventDefault();
-        loadUsers(++currentPage);
-    });
-
-    // Recharge
-    function showRechargeModal(id, username) {
-        targetUserId = id;
-        targetUsername = username;
-        selectedAmount = null;
+    // ── Recharge ──
+    function openRecharge(id, username) {
+        rechargeUserId = id;
+        rechargeAmount = null;
         document.getElementById('rechargeUsername').textContent = username;
         document.getElementById('customAmount').value = '';
         document.getElementById('rechargeError').classList.add('d-none');
         document.getElementById('rechargeSuccess').classList.add('d-none');
-        document.querySelectorAll('.recharge-amount').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.amt-btn').forEach(function(b) { b.classList.remove('active'); });
         new bootstrap.Modal(document.getElementById('rechargeModal')).show();
     }
 
-    document.querySelectorAll('.recharge-amount').forEach(btn => {
+    document.querySelectorAll('.amt-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.recharge-amount').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.amt-btn').forEach(function(b) { b.classList.remove('active'); });
             this.classList.add('active');
-            selectedAmount = parseFloat(this.dataset.amount);
+            rechargeAmount = parseFloat(this.getAttribute('data-val'));
             document.getElementById('customAmount').value = '';
         });
     });
 
     document.getElementById('customAmount').addEventListener('input', function() {
-        document.querySelectorAll('.recharge-amount').forEach(b => b.classList.remove('active'));
-        selectedAmount = null;
+        document.querySelectorAll('.amt-btn').forEach(function(b) { b.classList.remove('active'); });
+        rechargeAmount = null;
     });
 
-    async function confirmRecharge() {
-        let amount = selectedAmount;
+    document.getElementById('rechargeConfirmBtn').addEventListener('click', async function() {
+        var errEl = document.getElementById('rechargeError');
+        var sucEl = document.getElementById('rechargeSuccess');
+        errEl.classList.add('d-none');
+        sucEl.classList.add('d-none');
+
+        var amount = rechargeAmount;
         if (!amount) {
             amount = parseFloat(document.getElementById('customAmount').value);
             if (!amount || amount <= 0) {
-                document.getElementById('rechargeError').textContent = '请选择或输入有效金额';
-                document.getElementById('rechargeError').classList.remove('d-none');
+                errEl.textContent = '请选择或输入有效金额';
+                errEl.classList.remove('d-none');
                 return;
             }
         }
-        document.getElementById('rechargeError').classList.add('d-none');
-        document.getElementById('rechargeSuccess').classList.add('d-none');
-        const result = await api('/api/admin/user/recharge', {
-            user_id: targetUserId,
+        var result = await api('/api/admin/user/recharge', {
+            user_id: rechargeUserId,
             amount: amount
         });
         if (result.ok) {
-            document.getElementById('rechargeSuccess').textContent = result.msg;
-            document.getElementById('rechargeSuccess').classList.remove('d-none');
-            loadUsers(currentPage);
-            setTimeout(() => bootstrap.Modal.getInstance(document.getElementById('rechargeModal')).hide(), 1500);
+            sucEl.textContent = '✅ ' + result.msg;
+            sucEl.classList.remove('d-none');
+            loadUsers(userPage);
+            setTimeout(function() {
+                bootstrap.Modal.getInstance(document.getElementById('rechargeModal')).hide();
+            }, 1200);
         } else {
-            document.getElementById('rechargeError').textContent = result.msg;
-            document.getElementById('rechargeError').classList.remove('d-none');
+            errEl.textContent = '❌ ' + result.msg;
+            errEl.classList.remove('d-none');
         }
-    }
+    });
 
-    // Delete
-    function showDeleteModal(id, username) {
-        targetUserId = id;
-        targetUsername = username;
+    // ── Delete ──
+    function openDelete(id, username) {
+        delUserId = id;
+        delUsername = username;
         document.getElementById('deletePwd').value = '';
         document.getElementById('deleteError').classList.add('d-none');
         new bootstrap.Modal(document.getElementById('deleteModal')).show();
     }
 
-    document.getElementById('deleteForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const secondary_password = document.getElementById('deletePwd').value.trim();
-        const errEl = document.getElementById('deleteError');
+    function doDeleteUser(e) {
+        if (e) e.preventDefault();
+        var pwd = document.getElementById('deletePwd').value.trim();
+        var errEl = document.getElementById('deleteError');
         errEl.classList.add('d-none');
-        const result = await api('/api/admin/user/delete', {
-            user_id: targetUserId,
-            secondary_password
+        api('/api/admin/user/delete', { user_id: delUserId, secondary_password: pwd }).then(function(result) {
+            if (result.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                showToast('用户「' + delUsername + '」已删除', 'success');
+                loadUsers(userPage);
+            } else {
+                errEl.textContent = result.msg;
+                errEl.classList.remove('d-none');
+            }
         });
-        if (result.ok) {
-            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-            showToast(`用户「${targetUsername}」已删除`, 'success');
-            loadUsers(currentPage);
-        } else {
-            errEl.textContent = result.msg;
-            errEl.classList.remove('d-none');
-        }
-    });
+        return false;
+    }
 
     loadUsers(1);
 </script>
 <style>
-.recharge-amount { border-radius: 10px !important; font-weight: 600; padding: 10px 0 !important; transition: all .2s; }
-.recharge-amount:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,.08); }
-.recharge-amount.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.amt-btn { border-radius: 10px !important; font-weight: 600; padding: 10px 0 !important; transition: all .2s; }
+.amt-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,.08); }
+.amt-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 8px rgba(74,111,165,.3); }
 </style>
 {% endblock %}

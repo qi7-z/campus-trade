@@ -1,11 +1,17 @@
 {% extends "base.html" %}
 {% block title %}商品列表{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="fw-bold mb-0"><i class="fas fa-list text-info me-2"></i>商品列表</h4>
-    <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-secondary rounded-pill btn-sm px-3">
-        <i class="fas fa-arrow-left me-1"></i>返回
-    </a>
+    <div class="d-flex align-items-center gap-3">
+        <div class="small" style="background:#e8f0fe;padding:5px 14px;border-radius:50px;">
+            <i class="fas fa-wallet text-primary me-1"></i>
+            余额：<strong class="text-primary">¥<span id="listBalance">{{ "%.2f"|format(session.get('balance', 0)) }}</span></strong>
+        </div>
+        <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-secondary rounded-pill btn-sm px-3">
+            <i class="fas fa-arrow-left me-1"></i>返回
+        </a>
+    </div>
 </div>
 <div class="card shadow-sm border-0" style="border-radius:16px;">
     <div class="card-body p-0">
@@ -16,11 +22,11 @@
                         <th class="ps-4">#</th>
                         <th>商品名称</th>
                         <th>价格</th>
-                        <th class="pe-4">上架时间</th>
+                        <th class="pe-4 text-center" style="width:120px">操作</th>
                     </tr>
                 </thead>
                 <tbody id="itemTableBody">
-                    <tr><td colspan="4" class="text-center text-muted py-4">加载中...</td></tr>
+                    <tr><td colspan="4" class="text-center text-muted py-5">加载中...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -36,31 +42,54 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    let currentPage = 1;
+    var listPage = 1;
     async function loadItems(page) {
-        const data = await api(`/api/user/items?page=${page}`, null);
-        const tbody = document.getElementById('itemTableBody');
-        const nav = document.getElementById('paginationNav');
+        var data = await api('/api/user/items?page=' + page, null);
+        var tbody = document.getElementById('itemTableBody');
+        var nav = document.getElementById('paginationNav');
         if (!data.ok || data.items.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-5"><i class="fas fa-box-open fa-2x d-block mb-2 opacity-25"></i>暂无商品</td></tr>';
             nav.classList.add('d-none');
             return;
         }
-        tbody.innerHTML = data.items.map((item, i) => `
-            <tr>
-                <td class="ps-4 text-muted">${(page - 1) * 10 + i + 1}</td>
-                <td><strong>${item.name}</strong></td>
-                <td><span class="fw-bold text-danger">¥${item.price}</span></td>
-                <td class="pe-4 text-muted small">${item.created_at}</td>
-            </tr>
-        `).join('');
-        document.getElementById('pageInfo').textContent = `${page}/${data.total_pages}`;
+        tbody.innerHTML = data.items.map(function(item, i) {
+            return '<tr>' +
+                '<td class="ps-4 text-muted">' + ((page - 1) * 10 + i + 1) + '</td>' +
+                '<td><strong>' + item.name + '</strong></td>' +
+                '<td><span class="fw-bold text-danger">¥' + item.price + '</span></td>' +
+                '<td class="pe-4 text-center">' +
+                    '<button class="btn btn-success btn-sm rounded-pill px-3" onclick="buyFromList(' + item.id + ',\'' + item.name.replace(/'/g,'') + '\')">' +
+                        '<i class="fas fa-shopping-cart me-1"></i>购买' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+        document.getElementById('pageInfo').textContent = page + '/' + data.total_pages;
         document.getElementById('prevPage').classList.toggle('disabled', page <= 1);
         document.getElementById('nextPage').classList.toggle('disabled', page >= data.total_pages);
         nav.classList.remove('d-none');
     }
-    document.getElementById('prevPage').addEventListener('click', e => { e.preventDefault(); if (currentPage > 1) loadItems(--currentPage); });
-    document.getElementById('nextPage').addEventListener('click', e => { e.preventDefault(); loadItems(++currentPage); });
+    document.getElementById('prevPage').addEventListener('click', function(e) { e.preventDefault(); if (listPage > 1) loadItems(--listPage); });
+    document.getElementById('nextPage').addEventListener('click', function(e) { e.preventDefault(); loadItems(++listPage); });
+
+    async function buyFromList(itemId, itemName) {
+        var bal = await api('/api/user/balance');
+        if (!confirm('确定要购买「' + itemName + '」吗？')) return;
+        var result = await api('/api/user/purchase', { item_id: itemId });
+        if (result.ok) {
+            showToast('✅ 购买成功！已支付并加入购物车', 'success');
+            loadItems(listPage);
+            // 刷新余额显示
+            var b2 = await api('/api/user/balance');
+            if (b2.ok) {
+                document.getElementById('listBalance').textContent = b2.balance.toFixed(2);
+                var nb = document.getElementById('navBalance');
+                if (nb) nb.textContent = '¥' + b2.balance.toFixed(2);
+            }
+        } else {
+            showToast('❌ ' + result.msg, 'error');
+        }
+    }
     loadItems(1);
 </script>
 {% endblock %}
