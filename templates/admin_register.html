@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}管理员注册{% endblock %}
+{% block content %}
+<div class="row justify-content-center min-vh-75 align-items-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="text-center mb-4">🔧 管理员注册</h4>
+                <form id="registerForm" onsubmit="return false;">
+                    <div class="mb-3">
+                        <label class="form-label">授权码</label>
+                        <input type="password" class="form-control" id="authCode" required
+                               placeholder="请输入管理员授权码">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="username" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">确认密码</label>
+                        <input type="password" class="form-control" id="confirmPassword" required>
+                    </div>
+                    <div id="registerError" class="alert alert-danger d-none"></div>
+                    <button type="submit" class="btn btn-success w-100" id="registerBtn">注册管理员</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('index') }}" class="text-decoration-none">← 返回首页</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const auth_code = document.getElementById('authCode').value.trim();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const confirm = document.getElementById('confirmPassword').value;
+        const errEl = document.getElementById('registerError');
+        const btn = document.getElementById('registerBtn');
+
+        errEl.classList.add('d-none');
+        if (password !== confirm) {
+            errEl.textContent = '两次输入的密码不一致';
+            errEl.classList.remove('d-none');
+            return;
+        }
+        btn.disabled = true;
+        btn.textContent = '注册中...';
+
+        const result = await api('/api/admin/register', { auth_code, username, password });
+        if (result.ok) {
+            showToast('管理员注册成功！请登录', 'success');
+            setTimeout(() => window.location.href = '/', 1000);
+        } else {
+            errEl.textContent = result.msg;
+            errEl.classList.remove('d-none');
+            btn.disabled = false;
+            btn.textContent = '注册管理员';
+        }
+    });
+</script>
+{% endblock %}

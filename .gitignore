@@ -1,0 +1,9 @@
+*.pyc
+__pycache__/
+*.db
+.DS_Store
+venv/
+env/
+.env
+cloudflared.exe
+*.db

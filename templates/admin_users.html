@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}用户管理{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">👥 用户管理</h4>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary btn-sm">← 返回</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <p class="text-muted mb-3">共 <span id="userCount">0</span> 个用户</p>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>注册时间</th>
+                        <th>购买次数</th>
+                        <th style="width:100px">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr><td colspan="5" class="text-center text-muted">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <nav id="paginationNav" class="d-none">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item" id="prevPage"><a class="page-link" href="#">上一页</a></li>
+                <li class="page-item disabled"><a class="page-link" id="pageInfo" href="#">1/1</a></li>
+                <li class="page-item" id="nextPage"><a class="page-link" href="#">下一页</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">删除用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除该用户吗？该用户的所有商品和购买记录也将被删除。</p>
+                <form id="deleteForm" onsubmit="return false;">
+                    <div class="mb-3">
+                        <label class="form-label">请输入二级密码以确认</label>
+                        <input type="password" class="form-control" id="deletePwd" required
+                               placeholder="二级密码">
+                    </div>
+                    <div id="deleteError" class="alert alert-danger d-none"></div>
+                    <button type="submit" class="btn btn-danger w-100">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    let currentPage = 1;
+    let deleteUserId = null;
+    let deleteUsername = '';
+
+    async function loadUsers(page) {
+        const data = await api(`/api/admin/users?page=${page}`, null);
+        const tbody = document.getElementById('userTableBody');
+        const nav = document.getElementById('paginationNav');
+
+        document.getElementById('userCount').textContent = data.total || 0;
+
+        if (!data.ok || data.users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">暂无用户</td></tr>';
+            nav.classList.add('d-none');
+            return;
+        }
+
+        tbody.innerHTML = data.users.map(user => `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.username}</td>
+                <td>${user.created_at}</td>
+                <td>${user.purchase_count}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm w-100" onclick="showDeleteModal(${user.id}, '${user.username}')">删除</button>
+                </td>
+            </tr>
+        `).join('');
+
+        document.getElementById('pageInfo').textContent = `${page}/${data.total_pages}`;
+        document.getElementById('prevPage').classList.toggle('disabled', page <= 1);
+        document.getElementById('nextPage').classList.toggle('disabled', page >= data.total_pages);
+        nav.classList.remove('d-none');
+    }
+
+    document.getElementById('prevPage').addEventListener('click', e => {
+        e.preventDefault();
+        if (currentPage > 1) loadUsers(--currentPage);
+    });
+    document.getElementById('nextPage').addEventListener('click', e => {
+        e.preventDefault();
+        loadUsers(++currentPage);
+    });
+
+    function showDeleteModal(id, username) {
+        deleteUserId = id;
+        deleteUsername = username;
+        document.getElementById('deletePwd').value = '';
+        document.getElementById('deleteError').classList.add('d-none');
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    document.getElementById('deleteForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const secondary_password = document.getElementById('deletePwd').value.trim();
+        const errEl = document.getElementById('deleteError');
+        errEl.classList.add('d-none');
+
+        const result = await api('/api/admin/user/delete', {
+            user_id: deleteUserId,
+            secondary_password
+        });
+
+        if (result.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            showToast(`用户「${deleteUsername}」已删除`, 'success');
+            loadUsers(currentPage);
+        } else {
+            errEl.textContent = result.msg;
+            errEl.classList.remove('d-none');
+        }
+    });
+
+    loadUsers(1);
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}管理首页{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center mb-4">
+            <h3>🔧 管理员面板</h3>
+            <p class="text-muted">欢迎，{{ username }}！</p>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <a href="{{ url_for('admin_items_page') }}" class="text-decoration-none">
+                    <div class="card dashboard-card text-center p-3 h-100">
+                        <div class="card-body">
+                            <div class="fs-1 mb-2">📦</div>
+                            <h6>商品管理</h6>
+                            <small class="text-muted">浏览、添加、删除、修改商品</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('admin_users_page') }}" class="text-decoration-none">
+                    <div class="card dashboard-card text-center p-3 h-100">
+                        <div class="card-body">
+                            <div class="fs-1 mb-2">👥</div>
+                            <h6>用户管理</h6>
+                            <small class="text-muted">查看和删除用户</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<style>
+.dashboard-card { transition: transform .2s, box-shadow .2s; cursor: pointer; border: 1px solid #e0e0e0; }
+.dashboard-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,.1); }
+</style>
+{% endblock %}

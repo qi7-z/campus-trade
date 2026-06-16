@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}校园二手物品交易系统 - 首页{% endblock %}
+{% block content %}
+<div class="row justify-content-center min-vh-75 align-items-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="text-center mb-5">
+            <div class="welcome-icon mb-3">🏪</div>
+            <h1 class="display-4 fw-bold text-primary">校园二手物品交易系统</h1>
+            <p class="text-muted fs-5">安全、便捷的校园二手交易平台</p>
+        </div>
+        <div class="row g-3">
+            <div class="col-6">
+                <div class="card text-center h-100 border-primary">
+                    <div class="card-body py-4">
+                        <div class="fs-1 mb-2">👤</div>
+                        <h5 class="card-title">普通用户</h5>
+                        <p class="card-text text-muted small">浏览商品、发布闲置、购买心仪物品</p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('user_register_page') }}" class="btn btn-outline-primary btn-sm">注册</a>
+                            <button class="btn btn-primary" onclick="showLoginForm('user')">登录</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card text-center h-100 border-success">
+                    <div class="card-body py-4">
+                        <div class="fs-1 mb-2">🔧</div>
+                        <h5 class="card-title">管理员</h5>
+                        <p class="card-text text-muted small">管理商品、用户和信息维护</p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin_register_page') }}" class="btn btn-outline-success btn-sm">注册</a>
+                            <button class="btn btn-success" onclick="showLoginForm('admin')">登录</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="loginTitle">用户登录</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm" onsubmit="return false;">
+                    <div class="mb-3">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="loginUsername" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-control" id="loginPassword" required>
+                    </div>
+                    <div id="loginError" class="alert alert-danger d-none"></div>
+                    <button type="submit" class="btn btn-primary w-100" id="loginBtn">登录</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let loginRole = 'user';
+
+    function showLoginForm(role) {
+        loginRole = role;
+        document.getElementById('loginTitle').textContent = role === 'user' ? '用户登录' : '管理员登录';
+        document.getElementById('loginError').classList.add('d-none');
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+        new bootstrap.Modal(document.getElementById('loginModal')).show();
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const btn = document.getElementById('loginBtn');
+        const errEl = document.getElementById('loginError');
+
+        if (!username || !password) {
+            errEl.textContent = '用户名和密码不能为空';
+            errEl.classList.remove('d-none');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '登录中...';
+        errEl.classList.add('d-none');
+
+        const endpoint = loginRole === 'user' ? '/api/user/login' : '/api/admin/login';
+        const result = await api(endpoint, { username, password });
+
+        if (result.ok) {
+            window.location.href = loginRole === 'user' ? '/user/dashboard' : '/admin/dashboard';
+        } else {
+            errEl.textContent = result.msg;
+            errEl.classList.remove('d-none');
+            btn.disabled = false;
+            btn.textContent = '登录';
+        }
+    });
+</script>
+{% endblock %}

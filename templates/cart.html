@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}我的购物车{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">🛒 我的购物车</h4>
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-secondary btn-sm">← 返回</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <p class="text-muted mb-3">共 <span id="cartCount">0</span> 件商品</p>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>商品名称</th>
+                        <th>价格（元）</th>
+                        <th>购买时间</th>
+                    </tr>
+                </thead>
+                <tbody id="cartTableBody">
+                    <tr><td colspan="4" class="text-center text-muted">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <nav id="paginationNav" class="d-none">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item" id="prevPage"><a class="page-link" href="#">上一页</a></li>
+                <li class="page-item disabled"><a class="page-link" id="pageInfo" href="#">1/1</a></li>
+                <li class="page-item" id="nextPage"><a class="page-link" href="#">下一页</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    let currentPage = 1;
+
+    async function loadCart(page) {
+        const data = await api(`/api/user/cart?page=${page}`, null);
+        const tbody = document.getElementById('cartTableBody');
+        const nav = document.getElementById('paginationNav');
+
+        document.getElementById('cartCount').textContent = data.total || 0;
+
+        if (!data.ok || data.items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">购物车是空的，快去选购商品吧！</td></tr>';
+            nav.classList.add('d-none');
+            return;
+        }
+
+        tbody.innerHTML = data.items.map((item, i) => `
+            <tr>
+                <td>${(page - 1) * 10 + i + 1}</td>
+                <td>${item.name}</td>
+                <td>¥${item.price}</td>
+                <td>${item.purchased_at}</td>
+            </tr>
+        `).join('');
+
+        document.getElementById('pageInfo').textContent = `${page}/${data.total_pages}`;
+        document.getElementById('prevPage').classList.toggle('disabled', page <= 1);
+        document.getElementById('nextPage').classList.toggle('disabled', page >= data.total_pages);
+        nav.classList.remove('d-none');
+    }
+
+    document.getElementById('prevPage').addEventListener('click', e => {
+        e.preventDefault();
+        if (currentPage > 1) loadCart(--currentPage);
+    });
+    document.getElementById('nextPage').addEventListener('click', e => {
+        e.preventDefault();
+        loadCart(++currentPage);
+    });
+
+    loadCart(1);
+</script>
+{% endblock %}

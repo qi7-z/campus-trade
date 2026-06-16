@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}发布商品{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">📤 发布商品</h4>
+                    <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-secondary btn-sm">← 返回</a>
+                </div>
+                <form id="releaseForm" onsubmit="return false;">
+                    <div class="mb-3">
+                        <label class="form-label">商品名称（不超过15个字符）</label>
+                        <input type="text" class="form-control" id="itemName" maxlength="15" required autocomplete="off"
+                               placeholder="例如：二手自行车">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">价格（元）</label>
+                        <input type="text" class="form-control" id="itemPrice" required autocomplete="off"
+                               placeholder="例如：99.9">
+                        <div class="form-text">只允许输入数字和最多一个小数点</div>
+                    </div>
+                    <div id="releaseError" class="alert alert-danger d-none"></div>
+                    <button type="submit" class="btn btn-primary w-100" id="releaseBtn">确认发布</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.getElementById('releaseForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('itemName').value.trim();
+        const price = document.getElementById('itemPrice').value.trim();
+        const errEl = document.getElementById('releaseError');
+        const btn = document.getElementById('releaseBtn');
+
+        errEl.classList.add('d-none');
+        if (!name) { errEl.textContent = '请输入商品名称'; errEl.classList.remove('d-none'); return; }
+        if (!price) { errEl.textContent = '请输入商品价格'; errEl.classList.remove('d-none'); return; }
+
+        btn.disabled = true;
+        btn.textContent = '发布中...';
+
+        const result = await api('/api/user/release', { name, price });
+        if (result.ok) {
+            showToast('商品上架成功！', 'success');
+            document.getElementById('releaseForm').reset();
+        } else {
+            errEl.textContent = result.msg;
+            errEl.classList.remove('d-none');
+        }
+        btn.disabled = false;
+        btn.textContent = '确认发布';
+    });
+</script>
+{% endblock %}
